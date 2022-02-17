@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Droppable } from "react-beautiful-dnd";
 
 import Card from '@mui/material/Card';
@@ -10,29 +10,41 @@ import List from '@mui/material/List';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 
-import Item from './Item'
+import Item, { ModifyItemInterface } from './Item'
 
-function getTitle(startDate, i) {
+function getTitle(startDate: Date, i: number) {
   const day = new Date();
   day.setDate(startDate.getDate() + i);
   return day.toLocaleDateString('en-us', { weekday: "short", month: "short", day: "numeric" })
 }
 
-function ItemList({ startDate, items, listIndex, onAddItem, onRemoveItem, onEditItem, onRemoveList }) {
+export interface ModifyListInterface {
+  onAddItem: (listIndex: number, newItem: any) => void,
+  onRemoveList: (listIndex: number) => void,
+}
+
+interface ItemListInterface extends ModifyItemInterface, ModifyListInterface {
+  items: any[],
+  startDate: Date,
+  listIndex: number,
+}
+
+function ItemList(props: ItemListInterface) {
+  const { listIndex } = props;
   const [newItem, setNewItem] = useState("");
 
-  function onSubmit(event) {
+  function onSubmit(event: any) {
     if (newItem) {
-      onAddItem(listIndex, newItem);
+      props.onAddItem(listIndex, newItem);
       setNewItem("");
     }
     event.preventDefault();
   }
 
   return <Card variant="outlined">
-    <CardHeader title={getTitle(startDate, listIndex)} action={
+    <CardHeader title={getTitle(props.startDate, listIndex)} action={
       <IconButton aria-label="close" onClick={() => {
-        onRemoveList(listIndex);
+        props.onRemoveList(listIndex);
       }}>
         <CloseIcon />
       </IconButton>
@@ -48,15 +60,14 @@ function ItemList({ startDate, items, listIndex, onAddItem, onRemoveItem, onEdit
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {items.map((item, index) => (
+            {props.items.map((item: any, index: number) => (
               <Item
                 item={item}
                 index={index}
                 key={item.id}
                 listIndex={listIndex}
-                onRemoveItem={onRemoveItem}
-                onAddItem={onAddItem}
-                onEditItem={onEditItem}
+                onRemoveItem={props.onRemoveItem}
+                onEditItem={props.onEditItem}
               />
             ))}
             {provided.placeholder}

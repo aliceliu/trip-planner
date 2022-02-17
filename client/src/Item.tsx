@@ -2,29 +2,32 @@ import React, { useState } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import format from 'date-fns/format';
 
-
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import CardMedia from '@mui/material/CardMedia';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import Divider from '@mui/material/Divider';
-
 
 import EditItem from './EditItem';
 import ItemPopover from "./ItemPopover";
 
+export interface ModifyItemInterface {
+  onRemoveItem: (listIndex: number, index: number) => void,
+  onEditItem: (listIndex: number, index: number, newItem: any) => void,
+}
 
-function Item({ item, index, listIndex, onRemoveItem, onEditItem }) {
+interface ItemInterface extends ModifyItemInterface {
+  listIndex: number,
+  index: number,
+  item: any,
+}
 
+function Item(props: ItemInterface) {
+  const { index, item, listIndex } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const open = Boolean(anchorEl);
-
-  function onMoreClicked(event) {
-    setAnchorEl(event.currentTarget);
-  };
 
   function closePopover() {
     setAnchorEl(null);
@@ -35,7 +38,7 @@ function Item({ item, index, listIndex, onRemoveItem, onEditItem }) {
     closePopover();
   }
 
-  function formatTimeRange(startDate, endDate) {
+  function formatTimeRange(startDate: Date, endDate: Date) {
     if (!startDate) {
       return '';
     }
@@ -47,11 +50,9 @@ function Item({ item, index, listIndex, onRemoveItem, onEditItem }) {
     return start + end;
   }
 
-  function onConfirm(event, index, listIndex, newItem) {
-    onEditItem(listIndex, index, newItem);
+  function onConfirm(index: number, listIndex: number, newItem: any) {
+    props.onEditItem(listIndex, index, newItem);
     setDialogOpen(false);
-    closePopover();
-    event.preventDefault();
   }
 
   return (
@@ -64,7 +65,7 @@ function Item({ item, index, listIndex, onRemoveItem, onEditItem }) {
             {...provided.dragHandleProps}
             secondaryAction={
               <div>
-                <IconButton edge="end" aria-label="more" onClick={onMoreClicked}>
+                <IconButton edge="end" aria-label="more" onClick={(event: any) => setAnchorEl(event.currentTarget)}>
                   <MoreVertIcon />
                 </IconButton>
                 <ItemPopover
@@ -73,7 +74,7 @@ function Item({ item, index, listIndex, onRemoveItem, onEditItem }) {
                   anchorEl={anchorEl}
                   onClose={closePopover}
                   onEditClicked={onEditClicked}
-                  onRemoveItem={() => onRemoveItem(index, listIndex)}
+                  onRemoveItem={() => props.onRemoveItem(listIndex, index)}
                 />
               </div>
             }
@@ -97,8 +98,7 @@ function Item({ item, index, listIndex, onRemoveItem, onEditItem }) {
         listIndex={listIndex}
         item={item}
         onClose={() => setDialogOpen(false)}
-        onConfirm={onConfirm}>
-      </EditItem>
+        onConfirm={onConfirm} />
     </div >
   );
 }

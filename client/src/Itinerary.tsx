@@ -1,15 +1,21 @@
-import React from "react";
-import { DragDropContext } from "react-beautiful-dnd";
+import { DragDropContext, OnDragEndResponder } from "react-beautiful-dnd";
 
 import Grid from '@mui/material/Grid';
 
-import ItemList from './ItemList'
+import ItemList, { ModifyListInterface } from './ItemList'
+import { ModifyItemInterface } from './Item'
 
-function Itinerary(props) {
+interface ItineraryInterface extends ModifyItemInterface, ModifyListInterface {
+  items: any[],
+  startDate: Date,
+  onMoveItem: OnDragEndResponder,
+}
+
+function Itinerary(props: ItineraryInterface) {
   return (
     <Grid container spacing={2}>
       <DragDropContext onDragEnd={props.onMoveItem}>
-        {props.items.map((items, i) => (
+        {props.items.map((items: any[], i: number) => (
           <Grid item xs={4} key={i}>
             <ItemList
               items={items}

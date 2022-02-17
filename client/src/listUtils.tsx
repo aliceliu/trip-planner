@@ -1,54 +1,56 @@
-const reorder = (list, startIndex, endIndex) => {
+import { DropResult, DraggableLocation } from "react-beautiful-dnd";
+
+const reorder = (list: any[], startIndex: number, endIndex: number) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
   return result;
 };
 
-const move = (source, destination, droppableSource, droppableDestination) => {
+const move = (source: any[], destination: any[], droppableSource: DraggableLocation, droppableDestination: DraggableLocation) => {
   const sourceClone = Array.from(source);
   const destClone = Array.from(destination);
   const [removed] = sourceClone.splice(droppableSource.index, 1);
   destClone.splice(droppableDestination.index, 0, removed);
 
-  const result = {};
+  const result: { [key: string]: any } = {};
   result[droppableSource.droppableId] = sourceClone;
   result[droppableDestination.droppableId] = destClone;
   return result;
 };
 
-function removeItem(list, i, index) {
+function removeItem(list: any[], listIndex: number, index: number) {
   const newList = [...list];
-  newList[i].splice(index, 1);
+  newList[listIndex].splice(index, 1);
   return newList;
 }
 
-function removeList(list, i) {
+function removeList(list: any[], listIndex: number) {
   const newList = [...list];
-  newList.splice(i, 1);
+  newList.splice(listIndex, 1);
   return newList;
 }
 
-function addItem(list, i, item) {
+function addItem(list: any[], listIndex: number, item: any) {
   const newList = [...list];
-  newList[i].push(item);
+  newList[listIndex].push(item);
   return newList;
 }
 
-function replaceItem(list, i, index, item) {
+function replaceItem(list: any[], listIndex: number, index: number, item: any) {
   const newList = [...list];
-  newList[i][index] = item;
+  newList[listIndex][index] = item;
   return newList;
 }
 
-function reorderOrMove(result, list) {
+function reorderOrMove(result: DropResult, list: any[][]) {
   const { source, destination } = result;
   if (!destination) {
-    return;
+    return list;
   }
 
-  const sourceIndex = source.droppableId;
-  const destIndex = destination.droppableId;
+  const sourceIndex = parseInt(source.droppableId);
+  const destIndex = parseInt(destination.droppableId);
   let newList;
 
   if (sourceIndex === destIndex) {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
@@ -10,21 +10,29 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import TimePicker from '@mui/lab/TimePicker';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 
+interface EditItemInterface {
+  open: boolean,
+  listIndex: number,
+  index: number,
+  item: any,
+  onConfirm: (listIndex: number, index: number, newItem: any) => void,
+  onClose: () => void,
+}
 
-function EditItem({ onClose, open, onConfirm, item, index, listIndex }) {
+function EditItem(props: EditItemInterface) {
 
-  const [newItem, setNewItem] = useState({ ...item });
+  const [newItem, setNewItem] = useState({ ...props.item });
 
-  function updateItem(value, field) {
+  function updateItem(value: any, field: string) {
     if (value) {
-      const updatedItem = { ...item }
+      const updatedItem = { ...props.item }
       updatedItem[field] = value;
       setNewItem(updatedItem);
     }
   }
 
   return (
-    <Dialog onClose={onClose} open={open}>
+    <Dialog onClose={props.onClose} open={props.open}>
       <DialogTitle>Edit Activity</DialogTitle>
       <DialogContent style={{ padding: "2em" }}>
         <Stack spacing={2}>
@@ -58,7 +66,7 @@ function EditItem({ onClose, open, onConfirm, item, index, listIndex }) {
           </LocalizationProvider>
           <Button
             variant="contained"
-            onClick={(event) => onConfirm(event, index, listIndex, newItem)}
+            onClick={() => props.onConfirm(props.index, props.listIndex, newItem)}
           >
             Confirm
           </Button>
