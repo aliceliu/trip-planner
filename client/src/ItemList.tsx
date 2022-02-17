@@ -12,7 +12,10 @@ import Divider from '@mui/material/Divider';
 
 import Item, { ModifyItemInterface } from './Item'
 
-function getTitle(startDate: Date, i: number) {
+function getTitle(startDate: Date | null, i: number) {
+  if (!startDate) {
+    return `Day ${i + 1}`;
+  }
   const day = new Date();
   day.setDate(startDate.getDate() + i);
   return day.toLocaleDateString('en-us', { weekday: "short", month: "short", day: "numeric" })
@@ -25,7 +28,7 @@ export interface ModifyListInterface {
 
 interface ItemListInterface extends ModifyItemInterface, ModifyListInterface {
   items: any[],
-  startDate: Date,
+  startDate: Date | null,
   listIndex: number,
 }
 

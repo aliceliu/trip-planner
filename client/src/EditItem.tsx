@@ -21,15 +21,12 @@ interface EditItemInterface {
 
 function EditItem(props: EditItemInterface) {
 
-  const [newItem, setNewItem] = useState({ ...props.item });
+  const { item } = props;
 
-  function updateItem(value: any, field: string) {
-    if (value) {
-      const updatedItem = { ...props.item }
-      updatedItem[field] = value;
-      setNewItem(updatedItem);
-    }
-  }
+  const [title, setTitle] = useState(item.title);
+  const [description, setDescription] = useState(item.description);
+  const [startTime, setStartTime] = useState(item.startTime);
+  const [endTime, setEndTime] = useState(item.endTime);
 
   return (
     <Dialog onClose={props.onClose} open={props.open}>
@@ -37,36 +34,44 @@ function EditItem(props: EditItemInterface) {
       <DialogContent style={{ padding: "2em" }}>
         <Stack spacing={2}>
           <TextField
-            autoFocus required
+            autoFocus
             label="Title"
-            value={newItem && newItem.title}
-            onChange={(event) => updateItem(event.target.value, 'title')}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
           ></TextField>
           <TextField
             multiline
             label="Description"
-            value={newItem && newItem.description}
-            onChange={(event) => updateItem(event.target.value, 'description')}></TextField>
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}></TextField>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <TimePicker
               label="Start Time"
-              value={newItem && newItem.startTime}
-              onChange={(date) => updateItem(date, 'startTime')}
+              value={startTime}
+              onChange={(startTime) => setStartTime(startTime)}
               clearable={true}
+              minutesStep={5}
               renderInput={(params) => <TextField {...params} />}
             />
             <TimePicker
               label="End Time"
-              value={newItem && newItem.endTime}
-              onChange={(date) => updateItem(date, 'endTime')}
+              value={endTime}
+              onChange={(endTime) => setEndTime(endTime)}
               clearable={true}
-              disabled={!newItem.startTime}
+              minutesStep={5}
+              disabled={!startTime}
               renderInput={(params) => <TextField {...params} />}
             />
           </LocalizationProvider>
           <Button
             variant="contained"
-            onClick={() => props.onConfirm(props.index, props.listIndex, newItem)}
+            onClick={() => props.onConfirm(props.index, props.listIndex, {
+              ...item,
+              'title': title,
+              'description': description,
+              'startTime': startTime,
+              'endTime': endTime
+            })}
           >
             Confirm
           </Button>
