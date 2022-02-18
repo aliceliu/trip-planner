@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Droppable } from "react-beautiful-dnd";
+import { Droppable, Draggable } from "react-beautiful-dnd";
 
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -11,15 +11,6 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 
 import Item, { ModifyItemInterface } from './Item'
-
-function getTitle(startDate: Date | null, i: number) {
-  if (!startDate) {
-    return `Day ${i + 1}`;
-  }
-  const day = new Date();
-  day.setDate(startDate.getDate() + i);
-  return day.toLocaleDateString('en-us', { weekday: "short", month: "short", day: "numeric" })
-}
 
 export interface ModifyListInterface {
   onAddItem: (listIndex: number, newItem: any) => void,
@@ -64,14 +55,20 @@ function ItemList(props: ItemListInterface) {
             {...provided.droppableProps}
           >
             {props.items.map((item: any, index: number) => (
-              <Item
-                item={item}
-                index={index}
-                key={item.id}
-                listIndex={listIndex}
-                onRemoveItem={props.onRemoveItem}
-                onEditItem={props.onEditItem}
-              />
+              <Draggable draggableId={item.id} index={index} key={item.id}>
+                {provided =>
+                  <Item
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    item={item}
+                    index={index}
+
+                    listIndex={listIndex}
+                    onRemoveItem={props.onRemoveItem}
+                    onEditItem={props.onEditItem}
+                  />}
+              </Draggable>
             ))}
             {provided.placeholder}
           </List>
@@ -79,6 +76,15 @@ function ItemList(props: ItemListInterface) {
       </Droppable>
     </CardContent>
   </Card>
+}
+
+function getTitle(startDate: Date | null, i: number) {
+  if (!startDate) {
+    return `Day ${i + 1}`;
+  }
+  const day = new Date();
+  day.setDate(startDate.getDate() + i);
+  return day.toLocaleDateString('en-us', { weekday: "short", month: "short", day: "numeric" })
 }
 
 export default ItemList;

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Draggable } from "react-beautiful-dnd";
+import React, { useState, forwardRef } from "react";
 import format from 'date-fns/format';
 
 import ListItem from '@mui/material/ListItem';
@@ -22,8 +21,8 @@ interface ItemInterface extends ModifyItemInterface {
   item: any,
 }
 
-function Item(props: ItemInterface) {
-  const { index, item, listIndex } = props;
+const Item = forwardRef<any, ItemInterface>((props, ref) => {
+  const { index, item, listIndex, onRemoveItem, onEditItem, ...rest } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -38,60 +37,42 @@ function Item(props: ItemInterface) {
     closePopover();
   }
 
-  function formatTimeRange(startDate: Date, endDate: Date) {
-    if (!startDate) {
-      return '';
-    }
-    const start = format(startDate, 'HH:mm');
-    let end = '';
-    if (endDate) {
-      end = ' - ' + format(endDate, 'HH:mm');
-    }
-    return start + end;
-  }
-
   function onConfirm(index: number, listIndex: number, newItem: any) {
-    props.onEditItem(listIndex, index, newItem);
+    onEditItem(listIndex, index, newItem);
     setDialogOpen(false);
   }
 
   return (
-    <div>
-      <Draggable draggableId={item.id} index={index}>
-        {provided => (
-          <ListItem
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            secondaryAction={
-              <div>
-                <IconButton edge="end" aria-label="more" onClick={(event: any) => setAnchorEl(event.currentTarget)}>
-                  <MoreVertIcon />
-                </IconButton>
-                <ItemPopover
-                  id={open ? 'simple-popover' : undefined}
-                  open={open}
-                  anchorEl={anchorEl}
-                  onClose={closePopover}
-                  onEditClicked={onEditClicked}
-                  onRemoveItem={() => props.onRemoveItem(listIndex, index)}
-                />
-              </div>
-            }
-          >
-            {item.startTime &&
-              <CardMedia
-                component="small"
-                style={{ "margin": "0 1em 0 0" }}
-              >
-                {formatTimeRange(item.startTime, item.endTime)}
-              </CardMedia>
-            }
-            <ListItemText primary={item.title} secondary={item.description} />
-          </ListItem>
-        )
+    <>
+      <ListItem
+        ref={ref}
+        {...rest}
+        secondaryAction={
+          <div>
+            <IconButton edge="end" aria-label="more" onClick={(event: any) => setAnchorEl(event.currentTarget)}>
+              <MoreVertIcon />
+            </IconButton>
+            <ItemPopover
+              id={open ? 'simple-popover' : undefined}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={closePopover}
+              onEditClicked={onEditClicked}
+              onRemoveItem={() => onRemoveItem(listIndex, index)}
+            />
+          </div>
         }
-      </Draggable >
+      >
+        {item.startTime &&
+          <CardMedia
+            component="small"
+            style={{ "margin": "0 1em 0 0" }}
+          >
+            {formatTimeRange(item.startTime, item.endTime)}
+          </CardMedia>
+        }
+        <ListItemText primary={item.title} secondary={item.description} />
+      </ListItem>
       <EditItem
         open={dialogOpen}
         index={index}
@@ -99,8 +80,20 @@ function Item(props: ItemInterface) {
         item={item}
         onClose={() => setDialogOpen(false)}
         onConfirm={onConfirm} />
-    </div >
+    </>
   );
+})
+
+function formatTimeRange(startDate: Date, endDate: Date) {
+  if (!startDate) {
+    return '';
+  }
+  const start = format(startDate, 'HH:mm');
+  let end = '';
+  if (endDate) {
+    end = ' - ' + format(endDate, 'HH:mm');
+  }
+  return start + end;
 }
 
 export default Item;
