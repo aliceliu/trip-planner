@@ -3,7 +3,7 @@ import format from 'date-fns/format';
 
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import CardMedia from '@mui/material/CardMedia';
+import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
@@ -64,14 +64,14 @@ const Item = forwardRef<any, ItemInterface>((props, ref) => {
         }
       >
         {item.startTime &&
-          <CardMedia
+          <Box
             component="small"
-            style={{ "margin": "0 1em 0 0" }}
+            mr="1em"
           >
             {formatTimeRange(item.startTime, item.endTime)}
-          </CardMedia>
+          </Box>
         }
-        <ListItemText primary={item.title} secondary={item.description} />
+        <ListItemText primary={item.title} secondary={item.description} sx={{ whiteSpace: 'pre-wrap' }} />
       </ListItem>
       <EditItem
         open={dialogOpen}
