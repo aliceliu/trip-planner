@@ -3,8 +3,11 @@ import { DragDropContext, OnDragEndResponder } from "react-beautiful-dnd";
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
+
+
 import ItemList, { ModifyListInterface } from './ItemList'
 import { ModifyItemInterface } from './Item'
+
 
 interface ItineraryInterface extends ModifyItemInterface, ModifyListInterface {
   items: any[],
@@ -14,6 +17,7 @@ interface ItineraryInterface extends ModifyItemInterface, ModifyListInterface {
 }
 
 function Itinerary(props: ItineraryInterface) {
+
   return (
     <Grid container spacing={2}>
       <DragDropContext onDragEnd={props.onMoveItem}>
@@ -41,6 +45,7 @@ function Itinerary(props: ItineraryInterface) {
         </Button>
       </Grid>
     </Grid>
+
   );
 }
 

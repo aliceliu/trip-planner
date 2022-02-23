@@ -1,5 +1,5 @@
 import React, { useState, forwardRef } from "react";
-import format from 'date-fns/format';
+import { parseISO, format } from 'date-fns';
 import showdown from 'showdown';
 import parse from 'html-react-parser';
 
@@ -96,13 +96,19 @@ const Item = forwardRef<any, ItemInterface>((props, ref) => {
   );
 })
 
-function formatTimeRange(startDate: Date, endDate: Date) {
+function formatTimeRange(startDate: Date | string, endDate: Date | string) {
   if (!startDate) {
     return '';
+  }
+  if (typeof startDate === 'string') {
+    startDate = parseISO(startDate)
   }
   const start = format(startDate, 'HH:mm');
   let end = '';
   if (endDate) {
+    if (typeof endDate === 'string') {
+      endDate = parseISO(endDate)
+    }
     end = ' - ' + format(endDate, 'HH:mm');
   }
   return start + end;

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Droppable, Draggable } from "react-beautiful-dnd";
+import { format } from 'date-fns';
+import add from 'date-fns/add'
 
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -78,13 +80,15 @@ function ItemList(props: ItemListInterface) {
   </Card>
 }
 
-function getTitle(startDate: Date | null, i: number) {
+function getTitle(startDate: Date | string | null, i: number) {
   if (!startDate) {
     return `Day ${i + 1}`;
   }
-  const day = new Date();
-  day.setDate(startDate.getDate() + i);
-  return day.toLocaleDateString('en-us', { weekday: "short", month: "short", day: "numeric" })
+  if (typeof startDate === 'string') {
+    startDate = new Date(startDate)
+  }
+  const day = add(startDate, { days: i })
+  return format(day, 'E, MMM d')
 }
 
 export default ItemList;
