@@ -3,7 +3,8 @@ from flask import request
 from db.trip import Trip
 from db.base import Session, engine, Base
 from datetime import datetime
-from sqlalchemy import nullsfirst
+from sqlalchemy import nullsfirst, func, or_
+from datetime import date
 
 
 app = Flask(__name__)
@@ -17,8 +18,18 @@ session = Session()
 @app.route('/trips/', methods=['GET', 'POST'])
 def handle_trips():
     if request.method == 'GET':
-        trips = session.query(Trip).order_by(
-            nullsfirst(Trip.start_date)).all()
+        filter = request.args.get('filter')
+        trips_query = session.query(Trip)
+        if filter == 'upcoming':
+            trips_query = trips_query.filter(
+                or_(
+                    Trip.start_date == None,
+                    func.date(Trip.start_date) >= date.today())
+            ).order_by(nullsfirst(Trip.start_date))
+        elif filter == 'past':
+            trips_query = trips_query.filter(
+                func.date(Trip.start_date) < date.today()).order_by(Trip.start_date.desc())
+        trips = trips_query.all()
         result = []
         for trip in trips:
             result.append({
