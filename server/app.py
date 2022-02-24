@@ -3,6 +3,8 @@ from flask import request
 from db.trip import Trip
 from db.base import Session, engine, Base
 from datetime import datetime
+from sqlalchemy import nullsfirst
+
 
 app = Flask(__name__)
 
@@ -15,7 +17,8 @@ session = Session()
 @app.route('/trips/', methods=['GET', 'POST'])
 def handle_trips():
     if request.method == 'GET':
-        trips = session.query(Trip).all()
+        trips = session.query(Trip).order_by(
+            nullsfirst(Trip.start_date)).all()
         result = []
         for trip in trips:
             result.append({
