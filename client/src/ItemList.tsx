@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Droppable, Draggable } from "react-beautiful-dnd";
-import { format } from 'date-fns';
-import add from 'date-fns/add'
 
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -13,6 +11,8 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 
 import Item, { ModifyItemInterface } from './Item'
+import { formatDate } from './utils/timeFormatter';
+
 
 export interface ModifyListInterface {
   onAddItem: (listIndex: number, newItem: any) => void,
@@ -38,7 +38,7 @@ function ItemList(props: ItemListInterface) {
   }
 
   return <Card variant="outlined">
-    <CardHeader title={getTitle(props.startDate, listIndex)} action={
+    <CardHeader title={formatDate(props.startDate, listIndex)} action={
       <IconButton aria-label="close" onClick={() => {
         props.onRemoveList(listIndex);
       }}>
@@ -78,17 +78,6 @@ function ItemList(props: ItemListInterface) {
       </Droppable>
     </CardContent>
   </Card>
-}
-
-function getTitle(startDate: Date | string | null, i: number) {
-  if (!startDate) {
-    return `Day ${i + 1}`;
-  }
-  if (typeof startDate === 'string') {
-    startDate = new Date(startDate)
-  }
-  const day = add(startDate, { days: i })
-  return format(day, 'E, MMM d')
 }
 
 export default ItemList;

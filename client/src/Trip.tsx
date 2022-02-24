@@ -12,7 +12,7 @@ import DatePicker from '@mui/lab/DatePicker';
 import TextField from '@mui/material/TextField';
 
 import Itinerary from './Itinerary';
-import { addItem, replaceItem, reorderOrMove, removeItem, removeList } from './listUtils';
+import { addItem, replaceItem, reorderOrMove, removeItem, removeList } from './utils/listModifier';
 
 function Trip() {
 

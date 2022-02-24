@@ -1,5 +1,4 @@
 import React, { useState, forwardRef } from "react";
-import { parseISO, format } from 'date-fns';
 import showdown from 'showdown';
 import parse from 'html-react-parser';
 
@@ -12,6 +11,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 import EditItem from './EditItem';
 import ItemPopover from "./ItemPopover";
+import { formatTimeRange } from './utils/timeFormatter';
 
 export interface ModifyItemInterface {
   onRemoveItem: (listIndex: number, index: number) => void,
@@ -96,22 +96,6 @@ const Item = forwardRef<any, ItemInterface>((props, ref) => {
   );
 })
 
-function formatTimeRange(startDate: Date | string, endDate: Date | string) {
-  if (!startDate) {
-    return '';
-  }
-  if (typeof startDate === 'string') {
-    startDate = parseISO(startDate)
-  }
-  const start = format(startDate, 'HH:mm');
-  let end = '';
-  if (endDate) {
-    if (typeof endDate === 'string') {
-      endDate = parseISO(endDate)
-    }
-    end = ' - ' + format(endDate, 'HH:mm');
-  }
-  return start + end;
-}
+
 
 export default Item;

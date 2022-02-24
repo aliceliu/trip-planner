@@ -4,10 +4,8 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 
-
 import ItemList, { ModifyListInterface } from './ItemList'
 import { ModifyItemInterface } from './Item'
-
 
 interface ItineraryInterface extends ModifyItemInterface, ModifyListInterface {
   items: any[],
@@ -45,7 +43,6 @@ function Itinerary(props: ItineraryInterface) {
         </Button>
       </Grid>
     </Grid>
-
   );
 }
 
