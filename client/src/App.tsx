@@ -5,13 +5,14 @@ import {
 
 import './App.css';
 import Trip from './Trip';
+import Trips from './Trips'
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/trip/*" element={<Trip />}>
-        </Route>
+        <Route path="/" element={<Trips />} />
+        <Route path="/trip/*" element={<Trip />} />
       </Routes>
     </>
   );

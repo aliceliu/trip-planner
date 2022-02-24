@@ -12,33 +12,47 @@ session = Session()
 # Base.metadata.create_all(engine)
 
 
-@app.route('/trips/', methods=['POST'])
-def create_trip():
-    data = request.get_json()
-    attractions = data.get('attractions')
-    start_date = data.get('start_timestamp')
-    if start_date:
-        start_date = datetime.fromtimestamp(start_date)
-    trip = Trip(
-        start_date=start_date, attractions=attractions)
-    session.add(trip)
-    session.commit()
+@app.route('/trips/', methods=['GET', 'POST'])
+def handle_trips():
+    if request.method == 'GET':
+        trips = session.query(Trip).all()
+        result = []
+        for trip in trips:
+            result.append({
+                'id': trip.id,
+                'name': trip.name,
+                'start_timestamp': trip.start_date,
+                'days': len(trip.attractions)
+            })
 
-    return {'id': trip.id}, 201
+        return jsonify(list(result))
+
+    elif request.method == 'POST':
+        data = request.get_json()
+        name = data.get('name')
+        attractions = data.get('attractions')
+        start_date = data.get('start_timestamp')
+        if start_date:
+            start_date = datetime.fromtimestamp(start_date)
+        trip = Trip(
+            name=name, start_date=start_date, attractions=attractions)
+        session.add(trip)
+        session.commit()
+
+        return {'id': trip.id}, 201
 
 
-@app.route('/trips/<id>', methods=['GET', 'POST'])
-def get_trip(id):
+@app.route('/trips/<id>', methods=['GET', 'POST', 'DELETE'])
+def handle_trips_with_id(id):
     if request.method == 'GET':
         trip = session.query(Trip).filter_by(id=id).one_or_none()
-        result = []
-        if trip:
-            result = {
-                'attractions': trip.attractions,
-            }
-            if trip.start_date:
-                result['start_timestamp'] = trip.start_date
-        return jsonify(result)
+        if not trip:
+            return {}
+        return {
+            'name': trip.name,
+            'attractions': trip.attractions,
+            'start_timestamp': trip.start_date
+        }
 
     elif request.method == 'POST':
         trip = session.query(Trip).filter_by(id=id).one()
@@ -46,8 +60,15 @@ def get_trip(id):
         start_date = data.get('start_timestamp')
         if start_date:
             start_date = datetime.fromtimestamp(start_date)
+        trip.name = data.get('name')
         trip.start_date = start_date
         trip.attractions = data.get('attractions')
         session.commit()
 
+        return {'id': trip.id}
+
+    elif request.method == 'DELETE':
+        trip = session.query(Trip).filter_by(id=id).one()
+        session.delete(trip)
+        session.commit()
         return {'id': trip.id}

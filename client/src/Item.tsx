@@ -81,7 +81,7 @@ const Item = forwardRef<any, ItemInterface>((props, ref) => {
             sx={{ whiteSpace: 'pre-wrap' }} >
           </ListItemText>
         </ListItem>
-        {item.description && <Box mb={"1em"}>
+        {item.description && <Box mb={1} ml={2} typography='body2'>
           {item.description && parse(converter.makeHtml(item.description))}
         </Box>}
       </Card>

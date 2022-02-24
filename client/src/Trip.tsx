@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import axios from 'axios';
 import { DropResult, ResponderProvided } from "react-beautiful-dnd";
 import { useParams, useNavigate } from "react-router-dom";
+import axios from 'axios';
 import uuid from 'react-uuid'
 
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import Box from '@mui/material/Box';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
@@ -19,9 +18,25 @@ function Trip() {
 
   const navigate = useNavigate();
   const params = useParams();
+  const id = params["*"]
 
+  const [name, setName] = useState<string>('');
   const [attractions, setAttractions] = useState<any[][]>([[]]);
   const [startDate, setStartDate] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      axios.get(`/trips/${id}`)
+        .then(function (response) {
+          setName(response.data.name)
+          setStartDate(response.data.start_timestamp)
+          setAttractions(response.data.attractions)
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    }
+  }, [id]);
 
   function onAddItem(i: number, attraction: any) {
     const newAttractions = addItem(attractions, i, { id: uuid(), title: attraction });
@@ -29,8 +44,10 @@ function Trip() {
   }
 
   function onSave() {
-    const id = params["*"]
     const data: { [key: string]: any } = { 'attractions': attractions };
+    if (name) {
+      data['name'] = name
+    }
     if (startDate) {
       let startTimestamp = startDate;
       if (typeof startDate == 'string') {
@@ -49,26 +66,27 @@ function Trip() {
       })
   }
 
-
-  useEffect(() => {
-    const id = params["*"]
+  function onDelete() {
     if (id) {
-      axios.get(`/trips/${id}`)
+      axios.delete(`/trips/${id}`)
         .then(function (response) {
-          setStartDate(response.data.start_timestamp)
-          setAttractions(response.data.attractions)
+          navigate(`/`)
         })
         .catch(function (error) {
           console.log(error);
         })
     }
-  }, []);
+  }
 
   return (
     <>
       <Button onClick={onSave}>Save</Button>
-      <Stack p={"2em"}>
-        <Box mb={"1em"}>
+      {id && <Button onClick={onDelete}>Delete</Button>}
+      <Stack p={4}>
+        <Stack direction={'row'} mb={2} spacing={2}>
+          <TextField label="Trip Name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}></TextField>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Start Date"
@@ -77,7 +95,7 @@ function Trip() {
               renderInput={(params) => <TextField {...params} />}
             />
           </LocalizationProvider>
-        </Box>
+        </Stack>
         <Itinerary
           items={attractions}
           startDate={startDate}
