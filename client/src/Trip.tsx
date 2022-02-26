@@ -13,8 +13,9 @@ import TextField from '@mui/material/TextField';
 
 import Itinerary from './Itinerary';
 import { addItem, replaceItem, reorderOrMove, removeItem, removeList } from './utils/listModifier';
+import { User } from './firebase';
 
-function Trip() {
+function Trip(props: { user: User | null }) {
 
   const navigate = useNavigate();
   const params = useParams();
@@ -28,7 +29,7 @@ function Trip() {
     if (id) {
       axios.get(`/trips/${id}`)
         .then(function (response) {
-          setName(response.data.name)
+          setName(response.data.name ?? '')
           setStartDate(response.data.start_timestamp)
           setAttractions(response.data.attractions)
         })
@@ -55,7 +56,7 @@ function Trip() {
       }
       data['start_timestamp'] = startTimestamp.getTime() / 1000;
     }
-    axios.post(`/trips/${id}`, data)
+    axios.post(`/trips/${id ?? ''}`, data)
       .then(function (response) {
         if (!id) {
           navigate(`/trip/${response.data.id}`)
@@ -80,7 +81,7 @@ function Trip() {
 
   return (
     <>
-      <Button onClick={onSave}>Save</Button>
+      {<Button onClick={onSave}>Save</Button>}
       {id && <Button onClick={onDelete}>Delete</Button>}
       <Stack p={4}>
         <Stack direction={'row'} mb={2} spacing={2}>

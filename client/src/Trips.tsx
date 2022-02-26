@@ -17,7 +17,7 @@ function Trips() {
   const [tab, setTab] = useState<number>(0);
 
   useEffect(() => {
-    axios.get(`/trips/`, { params: { filter: tab == 0 ? 'upcoming' : 'past' } })
+    axios.get(`/trips/`, { params: { filter: tab === 0 ? 'upcoming' : 'past' } })
       .then(function (response) {
         setTrips(response.data)
       })

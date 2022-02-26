@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   Route,
   Routes,
@@ -5,16 +6,27 @@ import {
 
 import './App.css';
 import Trip from './Trip';
-import Trips from './Trips'
-import Header from './Header'
+import Trips from './Trips';
+import Header from './Header';
+import { auth, User } from './firebase';
 
 function App() {
+
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    auth.onAuthStateChanged(function (user) {
+      setUser(user);
+      console.log(user);
+    });
+  }, [])
+
   return (
     <>
-      <Header></Header>
+      <Header user={user} />
       <Routes>
-        <Route path="/" element={<Trips />} />
-        <Route path="/trip/*" element={<Trip />} />
+        <Route path="/" element={user ? <Trips /> : <Trip user={user} />} />
+        <Route path="/trip/*" element={<Trip user={user} />} />
       </Routes>
     </>
   );
