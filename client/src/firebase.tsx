@@ -1,5 +1,6 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
+import { getFirestore } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -17,4 +18,5 @@ if (!firebase.apps.length) {
 }
 
 export const auth = firebase.auth();
+export const db = getFirestore();
 export type User = firebase.User;

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { DropResult, ResponderProvided } from "react-beautiful-dnd";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from 'axios';
 import uuid from 'react-uuid'
+import { doc, addDoc, collection, getDoc, setDoc, writeBatch } from "firebase/firestore";
 
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
@@ -13,11 +13,12 @@ import TextField from '@mui/material/TextField';
 
 import Itinerary from './Itinerary';
 import { addItem, replaceItem, reorderOrMove, removeItem, removeList } from './utils/listModifier';
-import { User } from './firebase';
+import { db, User } from './firebase';
 
 function Trip(props: { user: User | null }) {
 
   const navigate = useNavigate();
+  const uid = props.user?.uid;
   const params = useParams();
   const id = params["*"]
 
@@ -27,15 +28,18 @@ function Trip(props: { user: User | null }) {
 
   useEffect(() => {
     if (id) {
-      axios.get(`/trips/${id}`)
-        .then(function (response) {
-          setName(response.data.name ?? '')
-          setStartDate(response.data.start_timestamp)
-          setAttractions(response.data.attractions)
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
+      getDoc(doc(db, 'trips', id)).then(function (response) {
+        const data = response.data();
+        if (data) {
+          setName(data.name ?? '');
+          setStartDate(data.start_timestamp && new Date(data.start_timestamp));
+          setAttractions(JSON.parse(data.attractions));
+        }
+      }).catch(console.error);
+    } else {
+      setName('');
+      setAttractions([[]]);
+      setStartDate(null);
     }
   }, [id]);
 
@@ -44,38 +48,35 @@ function Trip(props: { user: User | null }) {
     setAttractions(newAttractions)
   }
 
-  function onSave() {
-    const data: { [key: string]: any } = { 'attractions': attractions };
+  async function onSave() {
+    const data: { [key: string]: any } = { 'attractions': JSON.stringify(attractions) };
     if (name) {
-      data['name'] = name
+      data['name'] = name;
     }
-    if (startDate) {
-      let startTimestamp = startDate;
-      if (typeof startDate == 'string') {
-        startTimestamp = new Date(startDate)
-      }
-      data['start_timestamp'] = startTimestamp.getTime() / 1000;
+    const startTimestamp = startDate && startDate.getTime();
+    data['start_timestamp'] = startDate && startDate.getTime();
+    data['creator_id'] = uid;
+
+    const tripMetadata = { 'name': name, 'start_timestamp': startTimestamp, 'days': attractions.length };
+    if (id) {
+      const batch = writeBatch(db);
+      batch.update(doc(db, 'trips', id), data);
+      batch.set(doc(db, `users/${uid ?? ''}/trips/`, id), tripMetadata);
+      await batch.commit();
+    } else {
+      const trip = await addDoc(collection(db, 'trips'), data);
+      await setDoc(doc(db, `users/${uid ?? ''}/trips/`, trip.id), tripMetadata);
+      navigate(`/trip/${trip.id}`)
     }
-    axios.post(`/trips/${id ?? ''}`, data)
-      .then(function (response) {
-        if (!id) {
-          navigate(`/trip/${response.data.id}`)
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      })
   }
 
-  function onDelete() {
+  async function onDelete() {
     if (id) {
-      axios.delete(`/trips/${id}`)
-        .then(function (response) {
-          navigate(`/`)
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
+      const batch = writeBatch(db);
+      batch.delete(doc(db, `users/${uid ?? ''}/trips/`, id));
+      batch.delete(doc(db, 'trips', id))
+      await batch.commit();
+      navigate(`/`);
     }
   }
 
