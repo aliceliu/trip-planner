@@ -1,27 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
-import { Dialog } from '@mui/material';
 
-import { auth, User } from './firebase';
-import Auth from './Auth'
+import { User } from './firebase';
 
-function Header(props: { user: User | null }) {
+type PropType = {
+  user: User | null, onLoginClicked: () => void, onLogoutClicked: () => void
+}
 
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-
-  function onLogoutClicked() {
-    auth.signOut().then(function () {
-      navigate('/');
-    }).catch(function (error) {
-      console.log(error);
-    });
-  }
+function Header(props: PropType) {
 
   return <>
     <AppBar position="static">
@@ -32,14 +20,11 @@ function Header(props: { user: User | null }) {
           </Typography>
         </a>
         {props.user ?
-          <Button color="inherit" onClick={onLogoutClicked}>Logout</Button> :
-          <Button color="inherit" onClick={() => setOpen(true)}>Login</Button>
+          <Button color="inherit" onClick={props.onLogoutClicked}>Logout</Button> :
+          <Button color="inherit" onClick={props.onLoginClicked}>Login</Button>
         }
       </Toolbar>
     </AppBar >
-    <Dialog onClose={() => setOpen(false)} open={open}>
-      <Auth></Auth>
-    </Dialog>
   </>
 }
 

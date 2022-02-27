@@ -15,7 +15,7 @@ import Itinerary from './Itinerary';
 import { addItem, replaceItem, reorderOrMove, removeItem, removeList } from './utils/listModifier';
 import { db, User } from './firebase';
 
-function Trip(props: { user: User | null }) {
+function Trip(props: { user: User | null, showLogin: () => void }) {
 
   const navigate = useNavigate();
   const uid = props.user?.uid;
@@ -49,6 +49,10 @@ function Trip(props: { user: User | null }) {
   }
 
   async function onSave() {
+    if (!uid) {
+      props.showLogin();
+      return;
+    }
     const data: { [key: string]: any } = { 'attractions': JSON.stringify(attractions) };
     if (name) {
       data['name'] = name;
