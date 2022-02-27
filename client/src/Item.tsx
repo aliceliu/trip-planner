@@ -13,12 +13,12 @@ import EditItem from './EditItem';
 import ItemPopover from "./ItemPopover";
 import { formatTimeRange } from './utils/timeFormatter';
 
-export interface ModifyItemInterface {
+export type ModifyItemType = {
   onRemoveItem: (listIndex: number, index: number) => void,
   onEditItem: (listIndex: number, index: number, newItem: any) => void,
 }
 
-interface ItemInterface extends ModifyItemInterface {
+type PropType = ModifyItemType & {
   listIndex: number,
   index: number,
   item: any,
@@ -26,11 +26,11 @@ interface ItemInterface extends ModifyItemInterface {
 
 const converter = new showdown.Converter();
 
-const Item = forwardRef<any, ItemInterface>((props, ref) => {
+const Item = forwardRef<any, PropType>((props, ref) => {
+
   const { index, item, listIndex, onRemoveItem, onEditItem, ...rest } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-
   const open = Boolean(anchorEl);
 
   function closePopover() {
@@ -95,7 +95,5 @@ const Item = forwardRef<any, ItemInterface>((props, ref) => {
     </>
   );
 })
-
-
 
 export default Item;

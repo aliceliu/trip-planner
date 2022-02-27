@@ -10,7 +10,7 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import TimePicker from '@mui/lab/TimePicker';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 
-interface EditItemInterface {
+type PropType = {
   open: boolean,
   listIndex: number,
   index: number,
@@ -19,7 +19,7 @@ interface EditItemInterface {
   onClose: () => void,
 }
 
-function EditItem(props: EditItemInterface) {
+function EditItem(props: PropType) {
 
   const { item } = props;
 

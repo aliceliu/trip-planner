@@ -10,22 +10,22 @@ import List from '@mui/material/List';
 import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 
-import Item, { ModifyItemInterface } from './Item'
+import Item, { ModifyItemType } from './Item'
 import { formatDate } from './utils/timeFormatter';
 
 
-export interface ModifyListInterface {
+export type ModifyListType = {
   onAddItem: (listIndex: number, newItem: any) => void,
   onRemoveList: (listIndex: number) => void,
 }
 
-interface ItemListInterface extends ModifyItemInterface, ModifyListInterface {
+type PropType = ModifyItemType & ModifyListType & {
   items: any[],
   startDate: Date | null,
   listIndex: number,
 }
 
-function ItemList(props: ItemListInterface) {
+function ItemList(props: PropType) {
   const { listIndex } = props;
   const [newItem, setNewItem] = useState("");
 

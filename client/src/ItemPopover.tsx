@@ -2,7 +2,7 @@ import Popover from '@mui/material/Popover';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 
-interface ItemPopoverInterface {
+type PropType = {
   id: string | undefined,
   open: boolean,
   anchorEl: any
@@ -11,7 +11,8 @@ interface ItemPopoverInterface {
   onRemoveItem: () => void,
 }
 
-function ItemPopover(props: ItemPopoverInterface) {
+function ItemPopover(props: PropType) {
+
   return <Popover
     id={props.id}
     open={props.open}

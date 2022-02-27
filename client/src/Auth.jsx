@@ -27,7 +27,6 @@ const uiConfig = {
   ],
   // Terms of service url.
   tosUrl: '',
-  // Privacy policy url.
   privacyPolicyUrl: ''
 };
 

@@ -4,17 +4,17 @@ import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 
-import ItemList, { ModifyListInterface } from './ItemList'
-import { ModifyItemInterface } from './Item'
+import ItemList, { ModifyListType } from './ItemList'
+import { ModifyItemType } from './Item'
 
-interface ItineraryInterface extends ModifyItemInterface, ModifyListInterface {
+type ItineraryType = ModifyItemType & ModifyListType & {
   items: any[],
   startDate: Date | null,
   onMoveItem: OnDragEndResponder,
   onAddDay: () => void,
 }
 
-function Itinerary(props: ItineraryInterface) {
+function Itinerary(props: ItineraryType) {
 
   return (
     <Grid container spacing={2}>

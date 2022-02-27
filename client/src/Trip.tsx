@@ -28,14 +28,16 @@ function Trip(props: { user: User | null, showLogin: () => void }) {
 
   useEffect(() => {
     if (id) {
-      getDoc(doc(db, 'trips', id)).then(function (response) {
-        const data = response.data();
-        if (data) {
-          setName(data.name ?? '');
-          setStartDate(data.start_timestamp && new Date(data.start_timestamp));
-          setAttractions(JSON.parse(data.attractions));
-        }
-      }).catch(console.error);
+      getDoc(doc(db, 'trips', id))
+        .then(function (response) {
+          const data = response.data();
+          if (data) {
+            setName(data.name ?? '');
+            setStartDate(data.start_timestamp && new Date(data.start_timestamp));
+            setAttractions(JSON.parse(data.attractions));
+          }
+        })
+        .catch(console.error);
     } else {
       setName('');
       setAttractions([[]]);
@@ -86,8 +88,13 @@ function Trip(props: { user: User | null, showLogin: () => void }) {
 
   return (
     <>
-      {<Button onClick={onSave}>Save</Button>}
-      {id && <Button onClick={onDelete}>Delete</Button>}
+      <Stack
+        direction="row"
+        justifyContent="flex-end"
+      >
+        {<Button onClick={onSave}>Save</Button>}
+        {id && <Button onClick={onDelete}>Delete</Button>}
+      </Stack>
       <Stack p={4}>
         <Stack direction={'row'} mb={2} spacing={2}>
           <TextField label="Trip Name"
