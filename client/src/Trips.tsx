@@ -7,8 +7,8 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import CircularProgress from '@mui/material/CircularProgress';
 
+import Loading from './Loading';
 import { formatDateRange } from './utils/timeFormatter';
 import { User } from './firebase';
 import { getTrips } from './utils/trip';
@@ -36,13 +36,7 @@ function Trips(props: { user: User | null }) {
       <Tab label="Upcoming" />
       <Tab label="Past" />
     </Tabs>
-    {loading &&
-      <div
-        style={{ backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', display: 'flex', marginTop: '50vh' }}
-      >
-        <CircularProgress color="inherit" />
-      </div>
-    }
+    {loading && <Loading />}
     {!loading &&
       <Grid container spacing={2} p={4}>
         {trips.map(trip =>
