@@ -18,6 +18,7 @@ import Auth from './Auth'
 function App() {
 
   const navigate = useNavigate();
+  const pendingTrip = getTripFromLocalStorage();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true)
   const [openLogin, setOpenLogin] = useState(false);
@@ -25,23 +26,28 @@ function App() {
   useEffect(() => {
     auth.onAuthStateChanged(function (user) {
       setUser(user);
-      if (user) {
-        const pendingTrip = getTripFromLocalStorage();
-        if (pendingTrip) {
-          addTrip(user.uid, pendingTrip)
-            .then(trip => {
-              deleteTripFromLocalStorage();
-              navigate(`/trip/${trip.id}`)
-            })
-            .catch(console.error);
-        }
-      }
       setLoading(false);
     });
   }, [])
 
   function showLogin() {
     setOpenLogin(true);
+  }
+
+  function onSignIn(authResult: any, redirectUrl: any) {
+    setOpenLogin(false);
+    const user = authResult.user;
+    if (user) {
+      if (pendingTrip) {
+        addTrip(user.uid, pendingTrip)
+          .then(trip => {
+            deleteTripFromLocalStorage();
+            navigate(`/trip/${trip.id}`)
+          })
+          .catch(console.error);
+      }
+    }
+    return false;
   }
 
   function logout() {
@@ -56,11 +62,11 @@ function App() {
     <>
       <Header user={user} onLoginClicked={showLogin} onLogoutClicked={logout} />
       {!loading && <Routes>
-        <Route path="/" element={user ? <Trips user={user} /> : <Trip user={user} showLogin={showLogin} />} />
+        <Route path="/" element={user && !pendingTrip ? <Trips user={user} /> : <Trip user={user} showLogin={showLogin} />} />
         <Route path="/trip/*" element={<Trip user={user} showLogin={showLogin} />} />
       </Routes>}
       <Dialog onClose={() => setOpenLogin(false)} open={openLogin}>
-        <Auth></Auth>
+        <Auth onSignIn={onSignIn}></Auth>
       </Dialog>
     </>
   );
