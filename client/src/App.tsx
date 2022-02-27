@@ -9,6 +9,7 @@ import { Dialog } from '@mui/material';
 
 import './App.css';
 import { auth, User } from './firebase';
+import { addTrip, getTripFromLocalStorage, deleteTripFromLocalStorage } from './utils/trip';
 import Trip from './Trip';
 import Trips from './Trips';
 import Header from './Header';
@@ -24,6 +25,17 @@ function App() {
   useEffect(() => {
     auth.onAuthStateChanged(function (user) {
       setUser(user);
+      if (user) {
+        const pendingTrip = getTripFromLocalStorage();
+        if (pendingTrip) {
+          addTrip(user.uid, pendingTrip.data, pendingTrip.metadata)
+            .then(trip => {
+              deleteTripFromLocalStorage();
+              navigate(`/trip/${trip.id}`)
+            })
+            .catch(console.error);
+        }
+      }
     });
   }, [])
 

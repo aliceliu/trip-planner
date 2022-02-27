@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { DropResult, ResponderProvided } from "react-beautiful-dnd";
 import { useParams, useNavigate } from "react-router-dom";
 import uuid from 'react-uuid'
-import { doc, addDoc, collection, getDoc, setDoc, writeBatch } from "firebase/firestore";
 
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
@@ -13,7 +12,8 @@ import TextField from '@mui/material/TextField';
 
 import Itinerary from './Itinerary';
 import { addItem, replaceItem, reorderOrMove, removeItem, removeList } from './utils/listModifier';
-import { db, User } from './firebase';
+import { User } from './firebase';
+import { addTrip, addTripToLocalStorage, updateTrip, deleteTrip, getTrip } from './utils/trip';
 
 function Trip(props: { user: User | null, showLogin: () => void }) {
 
@@ -28,13 +28,12 @@ function Trip(props: { user: User | null, showLogin: () => void }) {
 
   useEffect(() => {
     if (id) {
-      getDoc(doc(db, 'trips', id))
-        .then(function (response) {
-          const data = response.data();
-          if (data) {
-            setName(data.name ?? '');
-            setStartDate(data.start_timestamp && new Date(data.start_timestamp));
-            setAttractions(JSON.parse(data.attractions));
+      getTrip(id)
+        .then(function (trip) {
+          if (trip) {
+            setName(trip.name ?? '');
+            setStartDate(trip.start_timestamp && new Date(trip.start_timestamp));
+            setAttractions(JSON.parse(trip.attractions));
           }
         })
         .catch(console.error);
@@ -51,37 +50,31 @@ function Trip(props: { user: User | null, showLogin: () => void }) {
   }
 
   async function onSave() {
-    if (!uid) {
-      props.showLogin();
-      return;
-    }
     const data: { [key: string]: any } = { 'attractions': JSON.stringify(attractions) };
     if (name) {
       data['name'] = name;
     }
     const startTimestamp = startDate && startDate.getTime();
-    data['start_timestamp'] = startDate && startDate.getTime();
-    data['creator_id'] = uid;
+    data['start_timestamp'] = startTimestamp;
+    const metadata = { 'name': name, 'start_timestamp': startTimestamp, 'days': attractions.length };
 
-    const tripMetadata = { 'name': name, 'start_timestamp': startTimestamp, 'days': attractions.length };
+    if (!uid) {
+      addTripToLocalStorage(data, metadata);
+      props.showLogin();
+      return;
+    }
+
     if (id) {
-      const batch = writeBatch(db);
-      batch.update(doc(db, 'trips', id), data);
-      batch.set(doc(db, `users/${uid ?? ''}/trips/`, id), tripMetadata);
-      await batch.commit();
+      await updateTrip(id, uid, data, metadata);
     } else {
-      const trip = await addDoc(collection(db, 'trips'), data);
-      await setDoc(doc(db, `users/${uid ?? ''}/trips/`, trip.id), tripMetadata);
+      const trip = await addTrip(uid, data, metadata);
       navigate(`/trip/${trip.id}`)
     }
   }
 
   async function onDelete() {
-    if (id) {
-      const batch = writeBatch(db);
-      batch.delete(doc(db, `users/${uid ?? ''}/trips/`, id));
-      batch.delete(doc(db, 'trips', id))
-      await batch.commit();
+    if (uid && id) {
+      await deleteTrip(uid, id)
       navigate(`/`);
     }
   }
@@ -95,11 +88,11 @@ function Trip(props: { user: User | null, showLogin: () => void }) {
         {<Button onClick={onSave}>Save</Button>}
         {id && <Button onClick={onDelete}>Delete</Button>}
       </Stack>
-      <Stack p={4}>
+      <Stack pl={4} pr={4}>
         <Stack direction={'row'} mb={2} spacing={2}>
           <TextField label="Trip Name"
             value={name}
-            onChange={(event) => setName(event.target.value)}></TextField>
+            onChange={(event) => setName(event.target.value)} />
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Start Date"
