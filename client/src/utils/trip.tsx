@@ -1,5 +1,4 @@
-import { cloneNode } from "domhandler";
-import { doc, addDoc, collection, getDoc, setDoc, writeBatch, query, getDocs, where, orderBy, updateDoc } from "firebase/firestore";
+import { doc, addDoc, collection, getDoc, setDoc, writeBatch, query, getDocs, where, orderBy } from "firebase/firestore";
 import { db } from '../firebase';
 
 const PENDING_TRIP_KEY = 'pendingSaveTrip';

@@ -5,7 +5,7 @@ import {
   Routes,
 } from "react-router-dom";
 
-import { Dialog } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 
 import './App.css';
 import { auth, User } from './firebase';
@@ -18,8 +18,8 @@ import Auth from './Auth'
 function App() {
 
   const navigate = useNavigate();
-
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true)
   const [openLogin, setOpenLogin] = useState(false);
 
   useEffect(() => {
@@ -36,6 +36,7 @@ function App() {
             .catch(console.error);
         }
       }
+      setLoading(false);
     });
   }, [])
 
@@ -54,10 +55,10 @@ function App() {
   return (
     <>
       <Header user={user} onLoginClicked={showLogin} onLogoutClicked={logout} />
-      <Routes>
-        <Route path="/" element={user ? <Trips /> : <Trip user={user} showLogin={showLogin} />} />
+      {!loading && <Routes>
+        <Route path="/" element={user ? <Trips user={user} /> : <Trip user={user} showLogin={showLogin} />} />
         <Route path="/trip/*" element={<Trip user={user} showLogin={showLogin} />} />
-      </Routes>
+      </Routes>}
       <Dialog onClose={() => setOpenLogin(false)} open={openLogin}>
         <Auth></Auth>
       </Dialog>

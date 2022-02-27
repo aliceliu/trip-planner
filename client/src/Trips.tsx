@@ -7,24 +7,25 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { formatDateRange } from './utils/timeFormatter';
-import { auth } from './firebase';
+import { User } from './firebase';
 import { getTrips } from './utils/trip';
 
+function Trips(props: { user: User | null }) {
 
-function Trips() {
-
-  const uid = auth.currentUser?.uid;
-
-  const [trips, setTrips] = useState<any[]>([[]]);
+  const [trips, setTrips] = useState<any[]>([]);
   const [tab, setTab] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const uid = props.user?.uid;
     if (uid) {
       getTrips(uid, tab === 0 ? 'upcoming' : 'past')
         .then(tripsResult => {
           setTrips(tripsResult);
+          setLoading(false)
         })
         .catch(console.error);
     }
@@ -35,32 +36,41 @@ function Trips() {
       <Tab label="Upcoming" />
       <Tab label="Past" />
     </Tabs>
-    <Grid container spacing={2} p={4}>
-      {trips.map(trip =>
-        <Grid item xs={12} md={4} lg={2} key={'trip-' + trip.id}
-        >
-          <a href={`/trip/${trip.id}`} style={{ textDecoration: 'none' }}>
-            <Paper sx={{ paddingTop: 10, paddingBottom: 10, textAlign: 'center' }} >
-              <Typography variant="h4" component="div" gutterBottom>
-                {trip.name || 'Untitled'}
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom component="div">
-                {formatDateRange(trip.start_timestamp, trip.days)}
-              </Typography>
-            </Paper>
-          </a>
+    {loading &&
+      <div
+        style={{ backgroundColor: 'white', justifyContent: 'center', alignItems: 'center', display: 'flex', marginTop: '50vh' }}
+      >
+        <CircularProgress color="inherit" />
+      </div>
+    }
+    {!loading &&
+      <Grid container spacing={2} p={4}>
+        {trips.map(trip =>
+          <Grid item xs={12} md={4} lg={2} key={'trip-' + trip.id}
+          >
+            <a href={`/trip/${trip.id}`} style={{ textDecoration: 'none' }}>
+              <Paper sx={{ paddingTop: 10, paddingBottom: 10, textAlign: 'center' }} >
+                <Typography variant="h4" component="div" gutterBottom>
+                  {trip.name || 'Untitled'}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom component="div">
+                  {formatDateRange(trip.start_timestamp, trip.days)}
+                </Typography>
+              </Paper>
+            </a>
+          </Grid>
+        )}
+        <Grid item xs={12} md={6} lg={4} key='add'>
+          <Button
+            variant="outlined"
+            href={`/trip/`}
+            startIcon={<AddIcon />}
+          >
+            Add Trip
+          </Button>
         </Grid>
-      )}
-      <Grid item xs={12} md={6} lg={4} key='add'>
-        <Button
-          variant="outlined"
-          href={`/trip/`}
-          startIcon={<AddIcon />}
-        >
-          Add Trip
-        </Button>
-      </Grid>
-    </Grid >
+      </Grid >
+    }
   </>
 }
 
