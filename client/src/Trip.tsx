@@ -44,6 +44,7 @@ function Trip(props: { user: User | null, showLogin: () => void }) {
       setName('');
       setAttractions([[]]);
       setStartDate(null);
+      setLoading(false);
     }
   }, [id]);
 
