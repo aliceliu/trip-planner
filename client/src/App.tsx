@@ -28,7 +28,7 @@ function App() {
       if (user) {
         const pendingTrip = getTripFromLocalStorage();
         if (pendingTrip) {
-          addTrip(user.uid, pendingTrip.data, pendingTrip.metadata)
+          addTrip(user.uid, pendingTrip)
             .then(trip => {
               deleteTripFromLocalStorage();
               navigate(`/trip/${trip.id}`)

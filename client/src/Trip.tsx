@@ -54,24 +54,23 @@ function Trip(props: { user: User | null, showLogin: () => void }) {
   }
 
   async function onSave() {
-    const data: { [key: string]: any } = { 'attractions': JSON.stringify(attractions) };
+    const data: { [key: string]: any } = { 'attractions': attractions };
     if (name) {
       data['name'] = name;
     }
     const startTimestamp = startDate && startDate.getTime();
     data['start_timestamp'] = startTimestamp;
-    const metadata = { 'name': name, 'start_timestamp': startTimestamp, 'days': attractions.length };
 
     if (!uid) {
-      addTripToLocalStorage(data, metadata);
+      addTripToLocalStorage(data);
       props.showLogin();
       return;
     }
 
     if (id) {
-      await updateTrip(uid, id, data, metadata);
+      await updateTrip(uid, id, data);
     } else {
-      const trip = await addTrip(uid, data, metadata);
+      const trip = await addTrip(uid, data);
       navigate(`/trip/${trip.id}`)
     }
   }

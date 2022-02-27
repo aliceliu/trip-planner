@@ -1,5 +1,6 @@
 import { doc, addDoc, collection, getDoc, setDoc, writeBatch, query, getDocs, where, orderBy } from "firebase/firestore";
 import { db } from '../firebase';
+import add from 'date-fns/add'
 
 const PENDING_TRIP_KEY = 'pendingSaveTrip';
 
@@ -20,8 +21,8 @@ async function getTrips(uid: string, filter: string) {
     );
     const q2 = query(
       tripsCollection,
-      where('start_timestamp', '>=', todayTimestamp),
-      orderBy('start_timestamp')
+      where('end_timestamp', '>=', todayTimestamp),
+      orderBy('end_timestamp')
     );
     let [q1Result, q2Result] = await Promise.all([getDocs(q1), getDocs(q2)]);
     result = [...q1Result.docs, ...q2Result.docs];
@@ -49,20 +50,23 @@ function getTripFromLocalStorage() {
   return result;
 }
 
-async function addTrip(uid: string | null, data, metadata) {
+async function addTrip(uid: string | null, data) {
+  const metadata = getTripMetadata(data)
   data['creator_id'] = uid;
+  data['attractions'] = JSON.stringify(data['attractions'])
   const trip = await addDoc(collection(db, 'trips'), data);
   await setDoc(doc(db, `users/${uid}/trips/`, trip.id), metadata);
   return trip;
 }
 
-function addTripToLocalStorage(data, metadata) {
-  window.localStorage.setItem(PENDING_TRIP_KEY, JSON.stringify({ 'data': data, 'metadata': metadata }));
+function addTripToLocalStorage(data) {
+  window.localStorage.setItem(PENDING_TRIP_KEY, JSON.stringify(data));
 }
 
-async function updateTrip(uid: string, id: string, data, metadata) {
+async function updateTrip(uid: string, id: string, data) {
+  const metadata = getTripMetadata(data)
   data['creator_id'] = uid;
-  console.log('update', uid, id, data, metadata);
+  data['attractions'] = JSON.stringify(data['attractions'])
   const batch = writeBatch(db);
   batch.update(doc(db, 'trips', id), data);
   batch.set(doc(db, `users/${uid}/trips/`, id), metadata);
@@ -78,6 +82,18 @@ async function deleteTrip(uid: string, id: string) {
 
 function deleteTripFromLocalStorage() {
   window.localStorage.removeItem(PENDING_TRIP_KEY);
+}
+
+function getTripMetadata(data) {
+  const startTimestamp = data.start_timestamp;
+  const days = data.attractions.length;
+  const metadata = { 'name': data.name, 'start_timestamp': startTimestamp, 'days': days };
+  if (startTimestamp) {
+    const startDate = new Date(startTimestamp)
+    const endDate = add(startDate, { days: days - 1 })
+    metadata['end_timestamp'] = endDate.getTime();
+  }
+  return metadata;
 }
 
 export { getTrips, getTrip, getTripFromLocalStorage, addTrip, addTripToLocalStorage, updateTrip, deleteTrip, deleteTripFromLocalStorage }
