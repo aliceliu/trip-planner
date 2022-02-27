@@ -1,4 +1,5 @@
-import { doc, addDoc, collection, getDoc, setDoc, writeBatch, query, getDocs, where, orderBy } from "firebase/firestore";
+import { cloneNode } from "domhandler";
+import { doc, addDoc, collection, getDoc, setDoc, writeBatch, query, getDocs, where, orderBy, updateDoc } from "firebase/firestore";
 import { db } from '../firebase';
 
 const PENDING_TRIP_KEY = 'pendingSaveTrip';
@@ -52,7 +53,7 @@ function getTripFromLocalStorage() {
 async function addTrip(uid: string | null, data, metadata) {
   data['creator_id'] = uid;
   const trip = await addDoc(collection(db, 'trips'), data);
-  await setDoc(doc(db, `users/${uid ?? ''}/trips/`, trip.id), metadata);
+  await setDoc(doc(db, `users/${uid}/trips/`, trip.id), metadata);
   return trip;
 }
 
@@ -61,15 +62,17 @@ function addTripToLocalStorage(data, metadata) {
 }
 
 async function updateTrip(uid: string, id: string, data, metadata) {
+  data['creator_id'] = uid;
+  console.log('update', uid, id, data, metadata);
   const batch = writeBatch(db);
   batch.update(doc(db, 'trips', id), data);
-  batch.set(doc(db, `users/${uid ?? ''}/trips/`, id), metadata);
+  batch.set(doc(db, `users/${uid}/trips/`, id), metadata);
   await batch.commit();
 }
 
 async function deleteTrip(uid: string, id: string) {
   const batch = writeBatch(db);
-  batch.delete(doc(db, `users/${uid ?? ''}/trips/`, id));
+  batch.delete(doc(db, `users/${uid}/trips/`, id));
   batch.delete(doc(db, 'trips', id))
   await batch.commit();
 }

@@ -65,7 +65,7 @@ function Trip(props: { user: User | null, showLogin: () => void }) {
     }
 
     if (id) {
-      await updateTrip(id, uid, data, metadata);
+      await updateTrip(uid, id, data, metadata);
     } else {
       const trip = await addTrip(uid, data, metadata);
       navigate(`/trip/${trip.id}`)
